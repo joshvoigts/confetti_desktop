@@ -1,0 +1,11 @@
+[package]
+name = "desktop_smash"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.14.1"
+bevy_rapier2d = { version = "*", features = [ "simd-stable", "debug-render-2d" ] }
+rand = "0.8.5"
+tempfile = "3.12.0"
+xcap = "0.0.10"
