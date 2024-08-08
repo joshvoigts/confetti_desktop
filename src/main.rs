@@ -17,10 +17,10 @@ fn main() {
       .add_plugins(
          RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0),
       )
-      .add_plugins(RapierDebugRenderPlugin::default())
+      // .add_plugins(RapierDebugRenderPlugin::default())
       .add_systems(
          Startup,
-         (setup, (setup_sprites, setup_materials_and_meshes)).chain(),
+         (setup, setup_materials_and_meshes).chain(),
       )
       .add_systems(Update, (mouse_input, handle_mouse_left))
       .add_event::<MouseLeftEvent>()
@@ -88,32 +88,8 @@ fn setup(
 fn setup_materials_and_meshes(
    mut commands: Commands,
    mut meshes: ResMut<Assets<Mesh>>,
-   mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
    commands.insert_resource(Meshes {
       ball: meshes.add(Circle::new(50.0)).into(),
-   });
-
-   commands.insert_resource(Materials {
-      green: materials.add(Color::srgb(0.0, 0.5, 0.0)),
-   });
-}
-
-fn setup_sprites(
-   mut commands: Commands,
-   asset_server: Res<AssetServer>,
-   mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-) {
-   let texture = asset_server.load("destruction.png");
-   let layout = TextureAtlasLayout::from_grid(
-      UVec2::splat(100),
-      7,
-      1,
-      None,
-      None,
-   );
-   let texture_atlas_layout = texture_atlas_layouts.add(layout);
-   commands.insert_resource(SpriteSheets {
-      destruct: (texture, texture_atlas_layout),
    });
 }
