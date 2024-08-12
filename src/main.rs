@@ -1,5 +1,7 @@
 use crate::action::*;
 use crate::control::*;
+use crate::pkv::Settings;
+use crate::screenshot::Screenshot;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, Window, WindowMode};
 use bevy_rapier2d::prelude::*;
@@ -7,11 +9,20 @@ use bevy_rapier2d::prelude::*;
 mod action;
 mod control;
 mod p;
-
-use std::env;
-use xcap::Monitor;
+mod pkv;
+mod screenshot;
 
 fn main() {
+   if let Ok(mut settings) = Settings::load() {
+      if settings.first_run {
+         p!("Skipping first run. Ensure screenshot permissions \
+            have been granted and run again.");
+         settings.first_run = false;
+         let _ = settings.save();
+         return;
+      }
+   }
+
    App::new()
       .add_plugins(DefaultPlugins)
       .add_plugins(
@@ -20,38 +31,31 @@ fn main() {
       // .add_plugins(RapierDebugRenderPlugin::default())
       .add_systems(
          Startup,
-         (setup, setup_materials_and_meshes).chain(),
+         (setup_main_window, setup, setup_materials_and_meshes)
+            .chain(),
       )
       .add_systems(Update, (mouse_input, handle_mouse_left))
       .add_event::<MouseLeftEvent>()
+      .insert_resource(Screenshot::capture())
+      .init_resource::<Screenshot>()
       .run();
+}
+
+fn setup_main_window(
+   mut windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
+   let mut window = windows.single_mut();
+   window.mode = WindowMode::BorderlessFullscreen;
 }
 
 fn setup(
    mut commands: Commands,
-   mut windows: Query<&mut Window, With<PrimaryWindow>>,
    asset_server: Res<AssetServer>,
+   screenshot: Res<Screenshot>,
 ) {
-   let mut window = windows.single_mut();
-   window.mode = WindowMode::BorderlessFullscreen;
-
-   // Screenshot background
-   let monitors = Monitor::all().unwrap();
-   let monitor = monitors.iter().find(|&m| m.is_primary()).unwrap();
-
-   let image = monitor.capture_image().unwrap();
-   let mut path_buf = env::temp_dir();
-   path_buf.push("tmp_screenshot.png");
-   let path = path_buf.to_string_lossy().into_owned();
-   image.save(path.clone()).unwrap();
-
-   let scale = 1.0 / monitor.scale_factor();
-   let width = (monitor.width() as f32) / monitor.scale_factor();
-   let height = (monitor.height() as f32) / monitor.scale_factor();
-
    commands.spawn(SpriteBundle {
-      transform: Transform::from_scale(Vec3::splat(scale)),
-      texture: asset_server.load(path),
+      transform: Transform::from_scale(Vec3::splat(screenshot.scale)),
+      texture: asset_server.load(screenshot.path.clone()),
       ..default()
    });
 
@@ -60,25 +64,25 @@ fn setup(
 
    // Physics boundaries
    commands.spawn((
-      Collider::cuboid(width - 2.0, 50.0),
+      Collider::cuboid(screenshot.width - 2.0, 50.0),
       TransformBundle::from(Transform::from_xyz(
          0.0,
-         0.0 - height - 50.0 + 2.0,
+         0.0 - screenshot.height - 50.0 + 2.0,
          0.0,
       )),
    ));
    commands.spawn((
-      Collider::cuboid(50.0, height - 2.0),
+      Collider::cuboid(50.0, screenshot.height - 2.0),
       TransformBundle::from(Transform::from_xyz(
-         0.0 - width - 50.0 + 2.0,
+         0.0 - screenshot.width - 50.0 + 2.0,
          0.0,
          0.0,
       )),
    ));
    commands.spawn((
-      Collider::cuboid(50.0, height - 2.0),
+      Collider::cuboid(50.0, screenshot.height - 2.0),
       TransformBundle::from(Transform::from_xyz(
-         width + 50.0 - 2.0,
+         screenshot.width + 50.0 - 2.0,
          0.0,
          0.0,
       )),
