@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use std::env;
 use xcap::Monitor;
+// use bevy_inspector_egui::InspectorOptions;
+// use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 
+// #[derive(Reflect, Resource, Default, InspectorOptions)]
+// #[reflect(Resource, InspectorOptions)]
 #[derive(Resource, Default)]
 pub struct Screenshot {
    pub height: f32,
@@ -24,8 +28,8 @@ impl Screenshot {
       image.save(path.clone()).unwrap();
 
       let scale = 1.0 / monitor.scale_factor();
-      let width = (monitor.width() as f32) / monitor.scale_factor();
-      let height = (monitor.height() as f32) / monitor.scale_factor();
+      let width = monitor.width() as f32;
+      let height = monitor.height() as f32;
 
       Self {
          height: height,
