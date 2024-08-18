@@ -2,4 +2,4 @@
 
 A small prank app that turns clicks into confetti.
 
-Grab the most recent release from the sidebar for your OS.
+[Get the most recent release](https://github.com/joshvoigts/confetti_desktop/releases).
