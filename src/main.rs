@@ -30,9 +30,9 @@ fn main() {
       .add_event::<MouseLeftEvent>()
       .insert_resource(Screenshot::capture())
       .init_resource::<Screenshot>()
-      .register_type::<Screenshot>()
-      .add_plugins(ResourceInspectorPlugin::<Screenshot>::default())
-      .add_plugins(WorldInspectorPlugin::new())
+      // .register_type::<Screenshot>()
+      // .add_plugins(ResourceInspectorPlugin::<Screenshot>::default())
+      // .add_plugins(WorldInspectorPlugin::new())
       .run();
 }
 
@@ -59,11 +59,10 @@ fn setup(
 fn setup_physics(
    mut commands: Commands,
    windows: Query<&Window, With<PrimaryWindow>>,
-   cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
    screenshot: Res<Screenshot>,
 ) {
    let window = windows.single();
-   let (camera, camera_transform) = cameras.single();
+   // let (camera, camera_transform) = cameras.single();
 
    let (win_width, win_height) = match OS {
       "macos" => (screenshot.width, screenshot.height),
