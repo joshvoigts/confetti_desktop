@@ -23,6 +23,12 @@ lipo "$TARGET_DIR/x86_64-apple-darwin/release/${RUST_CRATE_NAME}" \
      "$TARGET_DIR/aarch64-apple-darwin/release/${RUST_CRATE_NAME}" \
      -create -output "$APP_DIR/Contents/MacOS/${RUST_CRATE_NAME}"
 
+# adhoc sign the app
+sudo codesign --force --sign - --deep "$APP_DIR"
+
+zip -r "$RELEASE_DIR/${APP_NAME}-macos.zip" "$RELEASE_DIR/${APP_NAME}.app"
+
 # compile for windows
 cargo build --target=x86_64-pc-windows-gnu --release
 cp "$TARGET_DIR/x86_64-pc-windows-gnu/release/confetti_desktop.exe" "$RELEASE_DIR/${APP_NAME}.exe"
+zip "$RELEASE_DIR/${APP_NAME}-windows.zip" "$RELEASE_DIR/${APP_NAME}.exe"

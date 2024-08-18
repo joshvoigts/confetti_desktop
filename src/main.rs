@@ -15,25 +15,30 @@ mod control;
 mod p;
 mod screenshot;
 
+#[cfg(target_os = "macos")]
+mod macos;
+
 fn main() {
-   App::new()
-      .add_plugins(DefaultPlugins)
-      .add_plugins(
-         RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0),
-      )
-      // .add_plugins(RapierDebugRenderPlugin::default())
-      .add_systems(
-         Startup,
-         (setup, setup_physics, setup_materials_and_meshes).chain(),
-      )
-      .add_systems(Update, (mouse_input, handle_mouse_left))
-      .add_event::<MouseLeftEvent>()
-      .insert_resource(Screenshot::capture())
-      .init_resource::<Screenshot>()
-      // .register_type::<Screenshot>()
-      // .add_plugins(ResourceInspectorPlugin::<Screenshot>::default())
-      // .add_plugins(WorldInspectorPlugin::new())
-      .run();
+   if let Some(screenshot) = Screenshot::capture() {
+      App::new()
+         .add_plugins(DefaultPlugins)
+         .add_plugins(
+            RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0),
+         )
+         // .add_plugins(RapierDebugRenderPlugin::default())
+         .add_systems(
+            Startup,
+            (setup, setup_physics, setup_materials_and_meshes).chain(),
+         )
+         .add_systems(Update, (mouse_input, handle_mouse_left))
+         .add_event::<MouseLeftEvent>()
+         .insert_resource(screenshot)
+         .init_resource::<Screenshot>()
+         // .register_type::<Screenshot>()
+         // .add_plugins(ResourceInspectorPlugin::<Screenshot>::default())
+         // .add_plugins(WorldInspectorPlugin::new())
+         .run();
+   }
 }
 
 fn setup(

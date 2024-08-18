@@ -1,6 +1,11 @@
 use bevy::prelude::*;
 use std::env;
 use xcap::Monitor;
+use std::{thread, time};
+
+#[cfg(target_os = "macos")]
+use crate::macos::{preflight_access, request_access};
+
 // use bevy_inspector_egui::InspectorOptions;
 // use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 
@@ -14,8 +19,30 @@ pub struct Screenshot {
    pub path: String,
 }
 
+#[cfg(target_os = "macos")]
+pub fn test_access() -> bool {
+   if !preflight_access() {
+      request_access();
+      return false;
+   }
+   return true;
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn test_access() -> bool {
+   return true;
+}
+
 impl Screenshot {
-   pub fn capture() -> Self {
+   pub fn capture() -> Option<Self> {
+      if !test_access() {
+         return None;
+      }
+
+      // Sleep a bit otherwise we might capture the app
+      // starting animation.
+      thread::sleep(time::Duration::from_millis(200));
+
       // Screenshot background
       let monitors = Monitor::all().unwrap();
       let monitor =
@@ -31,11 +58,11 @@ impl Screenshot {
       let width = monitor.width() as f32;
       let height = monitor.height() as f32;
 
-      Self {
+      Some(Self {
          height: height,
          width: width,
          scale: scale,
          path: path,
-      }
+      })
    }
 }

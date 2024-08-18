@@ -1482,6 +1482,7 @@ dependencies = [
  "bevy",
  "bevy_rapier2d",
  "embed-resource",
+ "objc",
  "rand",
  "xcap",
 ]
