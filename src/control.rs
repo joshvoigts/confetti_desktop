@@ -1,3 +1,4 @@
+use bevy::app::AppExit;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -8,11 +9,14 @@ pub struct MainCamera;
 #[derive(Event)]
 pub struct MouseLeftEvent(pub Vec2);
 
+#[derive(Event)]
+pub struct DeleteEvent;
+
 pub fn mouse_input(
+   mut event: EventWriter<MouseLeftEvent>,
    buttons: Res<ButtonInput<MouseButton>>,
    cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
    windows: Query<&Window, With<PrimaryWindow>>,
-   mut event: EventWriter<MouseLeftEvent>,
 ) {
    if buttons.pressed(MouseButton::Left) {
       let (camera, camera_transform) = cameras.single();
@@ -27,5 +31,26 @@ pub fn mouse_input(
       {
          event.send(MouseLeftEvent(position));
       }
+   }
+}
+
+pub fn keyboard_input(
+   keyboard: Res<ButtonInput<KeyCode>>,
+   mut exit: EventWriter<AppExit>,
+   mut delete: EventWriter<DeleteEvent>,
+) {
+   if keyboard.pressed(KeyCode::Escape)
+      || keyboard.pressed(KeyCode::KeyQ)
+      || (keyboard.pressed(KeyCode::KeyC)
+         && keyboard.any_pressed([
+            KeyCode::ControlLeft,
+            KeyCode::ControlRight,
+         ]))
+   {
+      exit.send(AppExit::Success);
+   }
+
+   if keyboard.pressed(KeyCode::Backspace) {
+      delete.send(DeleteEvent);
    }
 }

@@ -6,11 +6,6 @@ use std::{thread, time};
 #[cfg(target_os = "macos")]
 use crate::macos::{preflight_access, request_access};
 
-// use bevy_inspector_egui::InspectorOptions;
-// use bevy_inspector_egui::prelude::ReflectInspectorOptions;
-
-// #[derive(Reflect, Resource, Default, InspectorOptions)]
-// #[reflect(Resource, InspectorOptions)]
 #[derive(Resource, Default)]
 pub struct Screenshot {
    pub height: f32,

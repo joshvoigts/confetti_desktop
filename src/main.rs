@@ -5,11 +5,8 @@ use crate::control::*;
 use crate::screenshot::Screenshot;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, Window, WindowMode};
-// use bevy_inspector_egui::quick::ResourceInspectorPlugin;
-// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy::winit::WinitWindows;
 use bevy_rapier2d::prelude::*;
-// use std::env::consts::OS;
 
 mod action;
 mod control;
@@ -22,8 +19,6 @@ mod macos;
 fn main() {
    if let Some(screenshot) = Screenshot::capture() {
       App::new()
-         //          .add_plugins(DefaultPlugins)
-         .insert_resource(ClearColor(Color::NONE))
          .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                transparent: true,
@@ -39,34 +34,30 @@ fn main() {
                100.0,
             ),
          )
-         // .add_plugins(RapierDebugRenderPlugin::default())
          .add_systems(
             Startup,
-            (setup, setup_physics, setup_materials_and_meshes)
-               .chain(),
+            (setup_camera, setup_physics, setup_materials_and_meshes),
          )
-         .add_systems(Update, (mouse_input, handle_mouse_left))
+         .add_systems(
+            Update,
+            (
+               keyboard_input,
+               mouse_input,
+               handle_mouse_left,
+               handle_delete,
+//                handle_too_much_confetti,
+            ),
+         )
          .add_event::<MouseLeftEvent>()
+         .add_event::<DeleteEvent>()
          .insert_resource(screenshot)
          .init_resource::<Screenshot>()
-         // .register_type::<Screenshot>()
-         // .add_plugins(ResourceInspectorPlugin::<Screenshot>::default())
-         // .add_plugins(WorldInspectorPlugin::new())
+         .init_resource::<BallCount>()
          .run();
    }
 }
 
-fn setup(
-   mut commands: Commands,
-   windows: Query<&Window, With<PrimaryWindow>>,
-   asset_server: Res<AssetServer>,
-) {
-   let mut window = windows.single_mut();
-   //    window.resolution.set_scale_factor_override(Some(1.0));
-   //    window.mode = WindowMode::BorderlessFullscreen;
-   //
-   //    let scale_y = screenshot.height / window.physical_height() as f32;
-
+fn setup_camera(mut commands: Commands) {
    commands.spawn((
       MainCamera,
       Camera2dBundle {
@@ -79,34 +70,16 @@ fn setup(
          ..default()
       },
    ));
-
-   // Spawn background
-   commands.spawn(SpriteBundle {
-      transform: Transform {
-         rotation: Quat::IDENTITY,
-         scale: Vec3::splat(
-            1.0 / window.resolution.base_scale_factor(),
-         ),
-         translation: Vec3::new(
-            win_width / 2.0,
-            win_height / 2.0,
-            0.0,
-         ),
-      },
-      texture: asset_server.load(screenshot.path.clone()),
-      ..default()
-   });
 }
 
 fn setup_physics(
    mut commands: Commands,
-   winit_windows: NonSend<WinitWindows>,
+   asset_server: Res<AssetServer>,
+   screenshot: Res<Screenshot>,
    windows: Query<(Entity, &Window), With<PrimaryWindow>>,
-   //    cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-   //    screenshot: Res<Screenshot>,
+   winit_windows: NonSend<WinitWindows>,
 ) {
    let (window_id, window) = windows.single();
-   //    let (camera, camera_transform) = cameras.single();
 
    // Bevy reports the wrong window size in full screen mode
    // so let's calculate it ourselves.
@@ -115,37 +88,6 @@ fn setup_physics(
    let scale_factor = winit_win.scale_factor() as f32;
    let win_width = win_size.width as f32 / scale_factor;
    let win_height = win_size.height as f32 / scale_factor;
-
-   // Debug
-   //
-   // let right = camera
-   //    .viewport_to_world_2d(
-   //       camera_transform,
-   //       Vec2::new(window.width() as f32, 0.0),
-   //    )
-   //    .unwrap()
-   //    .x;
-
-   // p!(window.resolution.base_scale_factor());
-   // p!(window.resolution.scale_factor());
-   // p!(window.resolution.physical_width());
-   // p!(window.resolution.physical_height());
-   // p!("---");
-
-   // p!(window.width());
-   // p!(screenshot.width);
-   // p!(win_width);
-   // p!("---");
-
-   // p!(window.height());
-   // p!(screenshot.height);
-   // p!(win_height);
-   // p!("---");
-
-   // p!(window.scale_factor());
-   // p!(screenshot.scale);
-
-   // p!(right);
 
    // Physics boundaries
    // Bottom
@@ -167,6 +109,23 @@ fn setup_physics(
          0.0,
       )),
    ));
+
+   // Spawn background
+   commands.spawn(SpriteBundle {
+      transform: Transform {
+         rotation: Quat::IDENTITY,
+         scale: Vec3::splat(
+            1.0 / window.resolution.base_scale_factor(),
+         ),
+         translation: Vec3::new(
+            win_width / 2.0,
+            win_height / 2.0,
+            0.0,
+         ),
+      },
+      texture: asset_server.load(screenshot.path.clone()),
+      ..default()
+   });
 }
 
 fn setup_materials_and_meshes(
