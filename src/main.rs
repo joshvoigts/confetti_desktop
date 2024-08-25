@@ -2,6 +2,7 @@
 
 use crate::action::*;
 use crate::control::*;
+use crate::modal::*;
 use crate::screenshot::Screenshot;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, Window, WindowMode};
@@ -10,6 +11,7 @@ use bevy_rapier2d::prelude::*;
 
 mod action;
 mod control;
+mod modal;
 mod p;
 mod screenshot;
 
@@ -34,7 +36,7 @@ fn main() {
                100.0,
             ),
          )
-         .add_plugins(RapierDebugRenderPlugin::default())
+         // .add_plugins(RapierDebugRenderPlugin::default())
          .add_systems(
             Startup,
             (setup_camera, setup_physics, setup_materials_and_meshes),
@@ -44,13 +46,16 @@ fn main() {
             (
                keyboard_input,
                mouse_input,
-               handle_mouse_left,
-               handle_delete,
-               //                handle_too_much_confetti,
+               handle_confetti,
+               handle_clear,
+               handle_modal,
+               handle_modal_button,
+               // handle_too_much_confetti,
             ),
          )
-         .add_event::<MouseLeftEvent>()
-         .add_event::<DeleteEvent>()
+         .add_event::<ConfettiEvent>()
+         .add_event::<ClearEvent>()
+         .add_event::<ModalEvent>()
          .insert_resource(screenshot)
          .init_resource::<Screenshot>()
          .init_resource::<BallCount>()

@@ -1,11 +1,12 @@
-use crate::control::DeleteEvent;
-use crate::control::MouseLeftEvent;
+use crate::control::ClearEvent;
+use crate::control::ConfettiEvent;
 use bevy::math::vec3;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::sprite::Mesh2dHandle;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::random;
+use crate::modal::Modal;
 
 #[derive(Resource)]
 pub struct Meshes {
@@ -18,12 +19,13 @@ pub struct Ball;
 #[derive(Default, Resource)]
 pub struct BallCount(usize);
 
-pub fn handle_mouse_left(
+pub fn handle_confetti(
    mut ball_count: ResMut<BallCount>,
    mut commands: Commands,
-   mut event: EventReader<MouseLeftEvent>,
+   mut event: EventReader<ConfettiEvent>,
    mut materials: ResMut<Assets<ColorMaterial>>,
    meshes: Res<Meshes>,
+   modal_ids: Query<Entity, With<Modal>>,
 ) {
    for ev in event.read() {
       let position = ev.0;
@@ -54,6 +56,9 @@ pub fn handle_mouse_left(
          Restitution::coefficient(0.7),
       ));
       ball_count.0 += 1;
+      for modal_id in modal_ids.iter() {
+         commands.entity(modal_id).despawn_recursive();
+      }
    }
 }
 
@@ -72,15 +77,19 @@ pub fn handle_mouse_left(
 //    }
 // }
 
-pub fn handle_delete(
+pub fn handle_clear(
    mut commands: Commands,
-   mut event: EventReader<DeleteEvent>,
+   mut event: EventReader<ClearEvent>,
    ball_ids: Query<Entity, With<Ball>>,
+   modal_ids: Query<Entity, With<Modal>>,
 ) {
    if !event.is_empty() {
       for ball_id in ball_ids.iter() {
          commands.entity(ball_id).despawn();
       }
       event.clear();
+      for modal_id in modal_ids.iter() {
+         commands.entity(modal_id).despawn_recursive();
+      }
    }
 }

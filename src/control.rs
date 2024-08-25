@@ -1,4 +1,3 @@
-use bevy::app::AppExit;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -7,13 +6,16 @@ use bevy::window::PrimaryWindow;
 pub struct MainCamera;
 
 #[derive(Event)]
-pub struct MouseLeftEvent(pub Vec2);
+pub struct ConfettiEvent(pub Vec2);
 
-#[derive(Event)]
-pub struct DeleteEvent;
+#[derive(Event, Default)]
+pub struct ClearEvent;
+
+#[derive(Event, Default)]
+pub struct ModalEvent;
 
 pub fn mouse_input(
-   mut event: EventWriter<MouseLeftEvent>,
+   mut event: EventWriter<ConfettiEvent>,
    buttons: Res<ButtonInput<MouseButton>>,
    cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
    windows: Query<&Window, With<PrimaryWindow>>,
@@ -29,28 +31,28 @@ pub fn mouse_input(
          })
          .map(|ray| ray.origin.truncate())
       {
-         event.send(MouseLeftEvent(position));
+         event.send(ConfettiEvent(position));
       }
    }
 }
 
 pub fn keyboard_input(
    keyboard: Res<ButtonInput<KeyCode>>,
-   mut exit: EventWriter<AppExit>,
-   mut delete: EventWriter<DeleteEvent>,
+   mut clear: EventWriter<ClearEvent>,
+   mut modal: EventWriter<ModalEvent>,
 ) {
-   if keyboard.pressed(KeyCode::Escape)
-      || keyboard.pressed(KeyCode::KeyQ)
-      || (keyboard.pressed(KeyCode::KeyC)
-         && keyboard.any_pressed([
-            KeyCode::ControlLeft,
-            KeyCode::ControlRight,
-         ]))
-   {
-      exit.send(AppExit::Success);
+   if keyboard.any_pressed([
+      KeyCode::Backspace,
+      KeyCode::Delete,
+      KeyCode::Escape,
+      KeyCode::KeyC,
+      KeyCode::KeyQ,
+      KeyCode::KeyW,
+   ]) {
+      modal.send_default();
    }
 
-   if keyboard.pressed(KeyCode::Backspace) {
-      delete.send(DeleteEvent);
+   if keyboard.pressed(KeyCode::Space) {
+      clear.send_default();
    }
 }

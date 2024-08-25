@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::env;
-use xcap::Monitor;
 use std::{thread, time};
+use xcap::Monitor;
 
 #[cfg(target_os = "macos")]
 use crate::macos::{preflight_access, request_access};
