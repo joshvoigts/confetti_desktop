@@ -34,6 +34,7 @@ fn main() {
                100.0,
             ),
          )
+         .add_plugins(RapierDebugRenderPlugin::default())
          .add_systems(
             Startup,
             (setup_camera, setup_physics, setup_materials_and_meshes),
@@ -45,7 +46,7 @@ fn main() {
                mouse_input,
                handle_mouse_left,
                handle_delete,
-//                handle_too_much_confetti,
+               //                handle_too_much_confetti,
             ),
          )
          .add_event::<MouseLeftEvent>()
@@ -64,7 +65,7 @@ fn setup_camera(mut commands: Commands) {
          projection: OrthographicProjection {
             far: 1000.0,
             near: -1000.0,
-            viewport_origin: Vec2::new(0.0, 0.0),
+            viewport_origin: Vec2::new(0.0, 0.5),
             ..default()
          },
          ..default()
@@ -93,7 +94,11 @@ fn setup_physics(
    // Bottom
    commands.spawn((
       Collider::cuboid(win_width, 2.0),
-      TransformBundle::from(Transform::from_xyz(0.0, 0.0 + 2.0, 0.0)),
+      TransformBundle::from(Transform::from_xyz(
+         0.0,
+         0.0 - (win_height / 2.0) + 2.0,
+         0.0,
+      )),
    ));
    // Left
    commands.spawn((
@@ -117,11 +122,7 @@ fn setup_physics(
          scale: Vec3::splat(
             1.0 / window.resolution.base_scale_factor(),
          ),
-         translation: Vec3::new(
-            win_width / 2.0,
-            win_height / 2.0,
-            0.0,
-         ),
+         translation: Vec3::new(win_width / 2.0, 0.0, 0.0),
       },
       texture: asset_server.load(screenshot.path.clone()),
       ..default()
