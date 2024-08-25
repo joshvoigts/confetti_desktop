@@ -25,7 +25,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.9</string>
 	<key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
-	<string>false</string>
+	<false/>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
