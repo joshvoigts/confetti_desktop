@@ -8,4 +8,5 @@ A small prank app that turns clicks into confetti.
 ## Contribution
 
 - Need linux builds
+- Doesn't work with macs with the "notch"
 - Upload to itch.io
