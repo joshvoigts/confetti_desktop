@@ -24,6 +24,8 @@
 	<string>public.app-category.entertainment</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.9</string>
+	<key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
+	<string>false</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
