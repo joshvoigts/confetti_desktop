@@ -36,7 +36,7 @@ impl Screenshot {
 
       // Sleep a bit otherwise we might capture the app
       // starting animation.
-      thread::sleep(time::Duration::from_millis(200));
+      thread::sleep(time::Duration::from_secs(2));
 
       // Screenshot background
       let monitors = Monitor::all().unwrap();

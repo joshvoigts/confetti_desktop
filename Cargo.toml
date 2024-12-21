@@ -1,6 +1,6 @@
 [package]
 name = "confetti_desktop"
-version = "0.1.0"
+version = "1.6.0"
 edition = "2021"
 
 [dependencies]
